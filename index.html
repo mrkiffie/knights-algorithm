@@ -7,10 +7,24 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <button id="toggle-all">Toggle All</button>
-    <button id="toggle-odd">Toggle Odd</button>
-    <button id="toggle-even">Toggle Even</button>
-    <div id="board"></div>
+    <div class="controls">
+        <button id="toggle-all">Toggle All</button>
+        <button id="toggle-odd">Toggle Odd</button>
+        <button id="toggle-even">Toggle Even</button>
+        <button id="reset">Reset</button>
+        <label>
+            Tiles per vertex: <input id="tiles-per-vertex" type="number" value="8" min="8" max="24">
+        </label>
+    </div>
+
+    <div id="board" class="cf"></div>
+
+    <div class="info">
+        <h1>Challange</h1>
+        <p>Given a knight on a chess board at position <code>[0, 0]</code></p>
+        <p>Write a function that will calculate the smallest amount of moves for the knight to get to position <code>[x, y]</code></p>
+    </div>
+
     <script src="app.js"></script>
 
 </body>

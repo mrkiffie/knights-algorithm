@@ -14,9 +14,9 @@ class ChessBoard {
     this.plotBoard();
   }
 
-  plotSquare(x, y) {
+  createSquare(x, y) {
     const square = document.createElement('div');
-    square.classList.add('square');
+    square.classList.add('square', 'invisible');
     // x and y are reversed because the divs are plotted in rows
     square.dataset.x = y;
     square.dataset.y = x;
@@ -38,16 +38,24 @@ class ChessBoard {
       square.dataset.even = true;
     }
 
-    this.board.appendChild(square);
+    return square;
   }
 
 
   plotBoard() {
+    let fragment = document.createDocumentFragment();
+
     for (let x = 0; x < this.tilesPerVertex; x++) {
       for (let y = 0; y < this.tilesPerVertex; y++) {
-        this.plotSquare(x, y);
+        fragment.appendChild(this.createSquare(x, y));
       }
     }
+
+    while (this.board.firstChild) {
+        this.board.removeChild(this.board.firstChild);
+    }
+
+    this.board.appendChild(fragment);
   }
 }
 
@@ -71,9 +79,9 @@ class Knight {
   }
 
   calculateShortestRoute(coords, counter = 0) {
-    let x = coords.x;
-    let y = coords.y;
-    let newCoords = null;
+    let x = coords.x * 1;
+    let y = coords.y * 1;
+    let newCoords = {};
 
     if (x < this.refererenceGrid.length && y < this.refererenceGrid.length) {
       counter = counter + this.refererenceGrid[x][y];
@@ -81,15 +89,12 @@ class Knight {
     }
 
     if (x > y) {
-      newCoords = {
-        x: x >= this.movement.a ? x - this.movement.a : x + this.movement.a,
-        y: y >= this.movement.b ? y - this.movement.b : y + this.movement.b
-      }
+      newCoords.x = (x >= this.movement.a ? x - this.movement.a : x + this.movement.a);
+      newCoords.y = (y >= this.movement.b ? y - this.movement.b : y + this.movement.b);
+
     } else {
-      newCoords = {
-        x: x >= this.movement.b ? x - this.movement.b : x + this.movement.b,
-        y: y >= this.movement.a ? y - this.movement.a : y + this.movement.a
-      }
+      newCoords.x = (x >= this.movement.b ? x - this.movement.b : x + this.movement.b);
+      newCoords.y = (y >= this.movement.a ? y - this.movement.a : y + this.movement.a);
     }
 
     return this.calculateShortestRoute(newCoords, ++counter);
@@ -99,7 +104,8 @@ class Knight {
 
 class App {
   constructor() {
-    this.board = new ChessBoard('#board', 36);
+
+    this.render();
 
     this.knight = new Knight();
 
@@ -107,7 +113,13 @@ class App {
     document.querySelector('#toggle-all').addEventListener('click', this.evaluateAllSquares.bind(this));
     document.querySelector('#toggle-odd').addEventListener('click', this.evaluateOddSquares.bind(this));
     document.querySelector('#toggle-even').addEventListener('click', this.evaluateEvenSquares.bind(this));
+    document.querySelector('#reset').addEventListener('click', this.render.bind(this));
+    document.querySelector('#tiles-per-vertex').addEventListener('change', this.render.bind(this));
+  }
 
+  render() {
+    const tilesPerVertex = document.querySelector('#tiles-per-vertex').value;
+    this.board = new ChessBoard('#board', Math.min(Math.max(tilesPerVertex, 5), 24));
   }
 
   onClick(evt) {
@@ -123,32 +135,20 @@ class App {
 
   evaluateSquare(square) {
 
-    if (square.dataset.count) {
-      this.hideInfo(square);
-    } else {
-      this.showInfo(square);
+    if (!square.dataset.count) {
+      const coords = {
+        x: square.dataset.x,
+        y: square.dataset.y
+      }
+
+      const shortestRouteCount = this.knight.calculateShortestRoute(coords);
+
+      square.dataset.count = shortestRouteCount;
+      square.innerText = shortestRouteCount;
+      square.style.backgroundColor = this.colorize(shortestRouteCount);
     }
 
-  }
-
-  showInfo(square) {
-
-    const coords = {
-      x: square.dataset.x * 1,
-      y: square.dataset.y * 1
-    }
-
-    const shortestRouteCount = this.knight.calculateShortestRoute(coords);
-
-    square.dataset.count = shortestRouteCount;
-    square.innerText = shortestRouteCount;
-    square.style.backgroundColor = this.colorize(shortestRouteCount);
-  }
-
-  hideInfo(square) {
-    square.dataset.count = '';
-    square.innerText = '';
-    square.style.backgroundColor = '';
+    square.classList.toggle('invisible');
   }
 
   colorize(stepSize) {
