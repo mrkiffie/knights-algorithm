@@ -17,9 +17,8 @@ class ChessBoard {
   createSquare(x, y) {
     const square = document.createElement('div');
     square.classList.add('square', 'invisible');
-    // x and y are reversed because the divs are plotted in rows
-    square.dataset.x = y;
-    square.dataset.y = x;
+    square.dataset.x = x;
+    square.dataset.y = y;
     square.style.width = this.squareDimension;
     square.style.height = this.squareDimension;
     square.style.lineHeight = this.squareDimension;
@@ -45,8 +44,8 @@ class ChessBoard {
   plotBoard() {
     let fragment = document.createDocumentFragment();
 
-    for (let x = 0; x < this.tilesPerVertex; x++) {
-      for (let y = 0; y < this.tilesPerVertex; y++) {
+    for (let y = 0; y < this.tilesPerVertex; y++) {
+      for (let x = 0; x < this.tilesPerVertex; x++) {
         fragment.appendChild(this.createSquare(x, y));
       }
     }
